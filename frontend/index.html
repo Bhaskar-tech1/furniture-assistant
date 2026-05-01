@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Furniture Matching Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-blur shape-1"></div>
+    <div class="background-blur shape-2"></div>
+    
+    <div class="container">
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="logo-container">
+                <img src="assets/logo.png" alt="Furniture Assistant Logo" class="site-logo">
+            </div>
+            <div class="hero-badge">AI-Powered</div>
+            <h1>Furniture Matching Assistant</h1>
+            <p>Upload a photo of your room space, and our AI will analyze its vibes and colors to suggest expertly matched furniture.</p>
+        </header>
+
+        <!-- Main Input Card -->
+        <main class="app-card glass-panel" id="main-card">
+            <div class="upload-section">
+                <div class="upload-area" id="drop-zone">
+                    <input type="file" id="file-input" accept="image/*" hidden />
+                    <div class="upload-content" id="upload-content">
+                        <div class="icon-pulse">
+                           <i class="fa-solid fa-cloud-arrow-up icon-large"></i>
+                        </div>
+                        <h3>Drag & drop your room photo here</h3>
+                        <p>or click to browse from your device</p>
+                    </div>
+                    <img id="image-preview" class="hidden" alt="Room preview" />
+                    <button class="icon-btn remove-btn hidden" id="remove-image">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="preferences-section">
+                <div class="input-group">
+                    <label for="room-type">Room Type <span class="optional">(Optional)</span></label>
+                    <select id="room-type">
+                        <option value="">Select a room...</option>
+                        <option value="Living Room">Living Room</option>
+                        <option value="Bedroom">Bedroom</option>
+                        <option value="Office">Home Office</option>
+                        <option value="Dining Room">Dining Room</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="preferred-style">Style Preference <span class="optional">(Optional)</span></label>
+                    <select id="preferred-style">
+                        <option value="Modern">Modern</option>
+                        <option value="Scandinavian">Scandinavian</option>
+                        <option value="Bohemian">Bohemian</option>
+                        <option value="Mid-Century Modern">Mid-Century Modern</option>
+                        <option value="Industrial">Industrial</option>
+                        <option value="Minimalist">Minimalist</option>
+                    </select>
+                </div>
+
+                <div class="input-group full-width">
+                    <label for="custom-instructions">Custom Details <span class="optional">(Optional)</span></label>
+                    <textarea id="custom-instructions" placeholder="e.g., I have a $500 budget, need space-saving ideas, make it cat-friendly..."></textarea>
+                </div>
+            </div>
+
+            <button id="generate-btn" class="primary-btn" disabled>
+                <span>Generate Suggestions</span>
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </button>
+        </main>
+
+        <!-- Loading State -->
+        <div id="loader-overlay" class="loader-overlay hidden">
+            <div class="loader-content glass-panel loading-glass">
+                <div class="dot-spinner">
+                    <div class="dot1"></div>
+                    <div class="dot2"></div>
+                </div>
+                <h3 id="loader-text">Analyzing image colors...</h3>
+                <p id="loader-subtext">This might take a few seconds.</p>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <section id="results-section" class="results-section hidden">
+            <div class="results-header">
+                <h2>Your Curated Matches</h2>
+                <div class="color-swatch-container">
+                    <span class="vibe-label">Dominant Vibe:</span>
+                    <div class="swatch-wrap">
+                        <div id="color-swatch" class="swatch"></div>
+                        <span id="color-hex" class="color-text">#000000</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="style-description glass-panel">
+                <div class="bulb-icon">
+                    <i class="fa-regular fa-lightbulb"></i>
+                </div>
+                <div>
+                   <h4>Style Overview</h4>
+                   <p id="style-text">Loading style description...</p>
+                </div>
+            </div>
+
+            <div class="furniture-grid" id="furniture-container">
+                <!-- Furniture cards injected here via JS -->
+            </div>
+
+            <!-- Room Visualization Section -->
+            <div class="room-visualization glass-panel" id="room-viz-section">
+                <div class="viz-header">
+                    <div class="viz-icon">
+                        <i class="fa-solid fa-panorama"></i>
+                    </div>
+                    <div>
+                        <h3>Your Room, Reimagined</h3>
+                        <p class="viz-subtitle">AI-generated visualization of your room with the suggested furniture</p>
+                    </div>
+                </div>
+                <div class="viz-image-container" id="viz-image-container">
+                    <div class="skeleton-loader viz-skeleton" id="viz-skeleton">
+                        <i class="fa-solid fa-wand-magic-sparkles skeleton-icon"></i>
+                        <span class="viz-loading-text">Generating your dream room...</span>
+                    </div>
+                    <img id="viz-image" class="viz-image" alt="Reimagined room with suggested furniture" />
+                </div>
+            </div>
+            
+            <div class="action-footer">
+               <button id="reset-btn" class="secondary-btn">
+                   <i class="fa-solid fa-rotate-left"></i> Start Over
+               </button>
+            </div>
+        </section>
+        
+        <footer class="app-footer">
+            <p>Future Scope: Image generation APIs and AR previews coming soon.</p>
+        </footer>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div id="chatbot-widget" class="chatbot-widget hidden">
+        <!-- Floating Toggle Button -->
+        <button id="chatbot-toggle" class="chatbot-toggle-btn" title="Ask about your suggestions">
+            <i class="fa-solid fa-comments" id="chatbot-icon-open"></i>
+            <i class="fa-solid fa-xmark hidden" id="chatbot-icon-close"></i>
+            <span class="chatbot-pulse"></span>
+        </button>
+
+        <!-- Chat Panel -->
+        <div id="chatbot-panel" class="chatbot-panel hidden">
+            <div class="chatbot-header">
+                <div class="chatbot-header-info">
+                    <div class="chatbot-avatar">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <h4>Design Assistant</h4>
+                        <span class="chatbot-status">Online &bull; Powered by AI</span>
+                    </div>
+                </div>
+                <button id="chatbot-close" class="chatbot-close-btn">
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+            </div>
+            <div id="chatbot-messages" class="chatbot-messages">
+                <div class="chat-message bot-message">
+                    <div class="message-bubble">
+                        👋 Hi! I'm your design assistant. Ask me anything about the furniture suggestions — alternatives, pricing tips, layout ideas, or color questions!
+                    </div>
+                </div>
+            </div>
+            <div class="chatbot-input-area">
+                <input type="text" id="chatbot-input" placeholder="Ask about your suggestions..." autocomplete="off" />
+                <button id="chatbot-send" class="chatbot-send-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
