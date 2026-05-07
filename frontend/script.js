@@ -105,14 +105,22 @@ async function handleGenerate() {
             body: formData
         });
         
-        if (!generateRes.ok) throw new Error('Failed to generate suggestions');
+        if (!generateRes.ok) {
+            let errorMsg = 'Failed to generate suggestions (Server Error)';
+            try {
+                const errData = await generateRes.json();
+                if (errData.error) errorMsg = errData.error;
+            } catch(e) {}
+            throw new Error(errorMsg);
+        }
+        
         const generateData = await generateRes.json();
         
         displayResults(generateData);
         
     } catch (error) {
         console.error(error);
-        alert('Error connecting to server.');
+        alert(`Error: ${error.message || 'Could not connect to the server. If the site was inactive, please wait a minute for it to wake up and try again.'}`);
     } finally {
         loaderOverlay.classList.add('hidden');
     }
