@@ -4,16 +4,23 @@ import numpy as np
 import base64
 import json
 import io
-from huggingface_hub import InferenceClient
-from flask import Flask, request, jsonify
+
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from groq import Groq
 from dotenv import load_dotenv
 
 # Load env vars
-load_dotenv()
+load_dotenv(override=True)
 
-app = Flask(__name__)
+# Get absolute path to the frontend folder
+frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend'))
+
+app = Flask(__name__, static_folder=frontend_dir, static_url_path='/')
+
+@app.route('/')
+def serve_index():
+    return send_from_directory(app.static_folder, 'index.html')
 CORS(app)  # enable CORS for frontend
 
 # Initialize Groq client
@@ -57,8 +64,46 @@ def get_dominant_color(image_bytes, k=3):
         print(f"Error in image processing: {e}")
         return None
 
+
 @app.route('/generate', methods=['POST'])
 def generate_suggestions():
+    # If Groq API key is missing, return mock data for local testing
+    if not os.getenv("GROQ_API_KEY"):
+        mock_response = {
+            "dominant_color": "#ff5733",
+            "style_description": "Modern minimalist style",
+            "items": [
+                {
+                    "name": "Sleek Sofa",
+                    "description": "A low-profile sofa with clean lines.",
+                    "image_url": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+                    "reason": "Matches modern aesthetic and color palette.",
+                    "suggested_color_hex": "#ff5733"
+                },
+                {
+                    "name": "Glass Coffee Table",
+                    "description": "Transparent glass top with a metal frame.",
+                    "image_url": "https://images.unsplash.com/photo-1582582494708-1bf916e710c2",
+                    "reason": "Adds a light, airy feel.",
+                    "suggested_color_hex": "#cccccc"
+                },
+                {
+                    "name": "Accent Chair",
+                    "description": "A vibrant accent chair for a pop of color.",
+                    "image_url": "https://images.unsplash.com/photo-1582582425600-6f7d1e03bfe5",
+                    "reason": "Provides contrast against the dominant hue.",
+                    "suggested_color_hex": "#0044ff"
+                },
+                {
+                    "name": "Floor Lamp",
+                    "description": "Modern floor lamp with adjustable brightness.",
+                    "image_url": "https://images.unsplash.com/photo-1519710164239-da123dc03ef4",
+                    "reason": "Enhances lighting and complements style.",
+                    "suggested_color_hex": "#ffffff"
+                }
+            ]
+        }
+        return jsonify(mock_response), 200
     if 'image' not in request.files:
         return jsonify({'error': 'No image uploaded'}), 400
         
@@ -73,17 +118,29 @@ def generate_suggestions():
     # 1. Get dominant color for the UI & AI Context
     dominant_color = get_dominant_color(image_bytes) or "#000000"
     
+    # Load dataset for prompt
+    try:
+        with open('furniture_dataset.json', 'r') as f:
+            catalog = json.load(f)
+    except Exception as e:
+        print(f"Error loading catalog: {e}")
+        catalog = []
+        
+    catalog_str = json.dumps(catalog)
+    
     # 2. Construct Dynamic Prompt
     prompt_text = (
         f"You are a highly acclaimed professional interior designer. "
         f"We used a computer vision algorithm on the user's room image, which detected a dominant color theme of {dominant_color}. "
         f"The room is intended to be a {room_type}. The preferred overall design style is {preferred_style}. "
         f"The user has the following custom details/constraints: {custom_instructions}. "
-        "Provide 3-4 matching furniture or decor pieces that fit these exact specs. Each item MUST be highly practical. "
-        "Also provide a well-written, overarching style description explaining *why* your curated items match the room. "
-        "IMPORTANT: You must suggest a specific, distinct color hex for each item that fits the color palette perfectly. "
+        f"Here is our furniture catalog (JSON):\n{catalog_str}\n\n"
+        "Select EXACTLY 4 items from the catalog that fit the room perfectly. "
+        "IMPORTANT: You MUST use the exact 'name', 'description', and 'image_url' provided in the catalog for each selected item. "
+        "Also provide a 'reason' why the item matches the room, and a 'suggested_color_hex' for it. "
+        "Also provide an overarching 'style_description'. "
         "Return your response strictly as valid JSON with NO markdown blocks and containing precisely this structure:\n"
-        "{\"style_description\": \"...\", \"items\": [{\"name\": \"...\", \"description\": \"...\", \"reason\": \"...\", \"suggested_color_hex\": \"#HEXCODE\"}]}"
+        "{\"style_description\": \"...\", \"items\": [{\"name\": \"...\", \"description\": \"...\", \"image_url\": \"...\", \"reason\": \"...\", \"suggested_color_hex\": \"#HEXCODE\"}]}"
     )
 
     try:
@@ -92,7 +149,7 @@ def generate_suggestions():
                 "role": "user",
                 "content": prompt_text
             }],
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-8b-instant",
             temperature=0.4,
             response_format={"type": "json_object"}
         )
@@ -149,7 +206,7 @@ def chat():
     try:
         chat_completion = client.chat.completions.create(
             messages=messages,
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-8b-instant",
             temperature=0.6,
             max_tokens=512
         )
@@ -160,25 +217,6 @@ def chat():
         return jsonify({'error': 'Failed to get a response'}), 500
 
 
-@app.route('/generate-image', methods=['GET'])
-def generate_image():
-    prompt = request.args.get('prompt')
-    if not prompt:
-        return "Prompt missing", 400
-        
-    try:
-        client = InferenceClient(api_key=os.environ.get('HF_API_KEY'))
-        # Using FLUX.1-schnell - currently one of the fastest free models
-        image = client.text_to_image(prompt, model="black-forest-labs/FLUX.1-schnell")
-        
-        img_byte_arr = io.BytesIO()
-        image.save(img_byte_arr, format='JPEG')
-        img_byte_arr.seek(0)
-        
-        return img_byte_arr.read(), 200, {'Content-Type': 'image/jpeg'}
-    except Exception as e:
-        print(f"HF Inference Error: {str(e)}")
-        return "Failed", 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
