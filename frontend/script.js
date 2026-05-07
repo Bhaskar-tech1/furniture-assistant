@@ -106,11 +106,20 @@ async function handleGenerate() {
         });
         
         if (!generateRes.ok) {
-            let errorMsg = 'Failed to generate suggestions (Server Error)';
+            let errorMsg = `Failed to generate suggestions (Server Error: ${generateRes.status})`;
+            
+            if (generateRes.status === 502 || generateRes.status === 504) {
+                errorMsg = 'The server is waking up or temporarily unavailable. Please wait a minute and try again.';
+            } else if (generateRes.status === 429) {
+                errorMsg = 'Too many requests. Please wait a minute before trying again.';
+            } else if (generateRes.status === 413) {
+                errorMsg = 'The uploaded image is too large. Please use a smaller image.';
+            }
+            
             try {
                 const errData = await generateRes.json();
                 if (errData.error) errorMsg = errData.error;
-            } catch(e) {}
+            } catch(e) {} // Not JSON, likely an HTML error page from Render
             throw new Error(errorMsg);
         }
         

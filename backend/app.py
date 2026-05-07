@@ -41,6 +41,13 @@ def get_dominant_color(image_bytes, k=3):
         # Convert from BGR to RGB
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         
+        # Resize the image to speed up clustering and avoid Out of Memory (OOM) errors
+        max_dim = 150
+        h, w = img.shape[:2]
+        if h > max_dim or w > max_dim:
+            scale = max_dim / max(h, w)
+            img = cv2.resize(img, (int(w * scale), int(h * scale)))
+            
         # Reshape the image to be a list of pixels
         pixels = img.reshape((-1, 3))
         pixels = np.float32(pixels)
