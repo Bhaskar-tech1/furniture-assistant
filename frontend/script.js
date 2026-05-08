@@ -162,16 +162,9 @@ function displayResults(data) {
             else if (lowerName.includes('lamp') || lowerName.includes('light')) iconClass = 'fa-lightbulb';
             
             const itemColor = item.suggested_color_hex || '#cccccc';
-            const imageUrl = item.image_url || 'https://loremflickr.com/512/512/furniture';
 
             card.innerHTML = `
-                <div class="card-image-container">
-                    <img src="${imageUrl}" alt="${item.name}" class="furniture-gen-image loaded" style="opacity:1 !important;" />
-                    <div class="item-color-indicator overlay-color">
-                        <div class="item-swatch" style="background-color: ${itemColor};"></div>
-                    </div>
-                </div>
-                <div class="card-header">
+                <div class="card-header" style="border-bottom: 3px solid ${itemColor}; padding-bottom: 10px;">
                     <i class="fa-solid ${iconClass} furniture-icon"></i>
                     <h3>${item.name}</h3>
                 </div>

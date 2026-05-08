@@ -4,6 +4,9 @@ import numpy as np
 import base64
 import json
 import io
+import requests
+import concurrent.futures
+from huggingface_hub import InferenceClient
 
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
@@ -72,6 +75,14 @@ def get_dominant_color(image_bytes, k=3):
         return None
 
 
+def is_room(image_bytes):
+    """
+    Since Groq Vision models are decommissioned, we bypass this check for now.
+    We rely on frontend instructions to guide the user.
+    """
+    return True
+
+
 @app.route('/generate', methods=['POST'])
 def generate_suggestions():
     # If Groq API key is missing, return mock data for local testing
@@ -117,6 +128,10 @@ def generate_suggestions():
     file = request.files['image']
     image_bytes = file.read()
     
+    # Check if the image is actually a room
+    if not is_room(image_bytes):
+        return jsonify({'error': 'Please upload an image of a room only.'}), 400
+    
     # Extract form data
     room_type = request.form.get('room_type', 'room')
     preferred_style = request.form.get('preferred_style', 'modern')
@@ -125,29 +140,17 @@ def generate_suggestions():
     # 1. Get dominant color for the UI & AI Context
     dominant_color = get_dominant_color(image_bytes) or "#000000"
     
-    # Load dataset for prompt
-    try:
-        with open('furniture_dataset.json', 'r') as f:
-            catalog = json.load(f)
-    except Exception as e:
-        print(f"Error loading catalog: {e}")
-        catalog = []
-        
-    catalog_str = json.dumps(catalog)
-    
-    # 2. Construct Dynamic Prompt
+    # 2. Construct Dynamic Prompt (No Catalog)
     prompt_text = (
         f"You are a highly acclaimed professional interior designer. "
         f"We used a computer vision algorithm on the user's room image, which detected a dominant color theme of {dominant_color}. "
         f"The room is intended to be a {room_type}. The preferred overall design style is {preferred_style}. "
         f"The user has the following custom details/constraints: {custom_instructions}. "
-        f"Here is our furniture catalog (JSON):\n{catalog_str}\n\n"
-        "Select EXACTLY 4 items from the catalog that fit the room perfectly. "
-        "IMPORTANT: You MUST use the exact 'name', 'description', and 'image_url' provided in the catalog for each selected item. "
-        "Also provide a 'reason' why the item matches the room, and a 'suggested_color_hex' for it. "
+        "Generate EXACTLY 4 specific furniture item suggestions that fit the room perfectly. "
+        "For each item, provide a 'name', a detailed 'description', a 'reason' why it matches the room, and a 'suggested_color_hex'. "
         "Also provide an overarching 'style_description'. "
         "Return your response strictly as valid JSON with NO markdown blocks and containing precisely this structure:\n"
-        "{\"style_description\": \"...\", \"items\": [{\"name\": \"...\", \"description\": \"...\", \"image_url\": \"...\", \"reason\": \"...\", \"suggested_color_hex\": \"#HEXCODE\"}]}"
+        "{\"style_description\": \"...\", \"items\": [{\"name\": \"...\", \"description\": \"...\", \"reason\": \"...\", \"suggested_color_hex\": \"#HEXCODE\"}]}"
     )
 
     try:
@@ -157,7 +160,7 @@ def generate_suggestions():
                 "content": prompt_text
             }],
             model="llama-3.1-8b-instant",
-            temperature=0.4,
+            temperature=0.7,
             response_format={"type": "json_object"}
         )
         response_text = chat_completion.choices[0].message.content
