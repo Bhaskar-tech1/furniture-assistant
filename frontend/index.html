@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,10 +10,11 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <div class="background-blur shape-1"></div>
     <div class="background-blur shape-2"></div>
-    
+
     <div class="container">
         <!-- Hero Section -->
         <header class="hero">
@@ -21,7 +23,9 @@
             </div>
             <div class="hero-badge">AI-Powered</div>
             <h1>Furniture Matching Assistant</h1>
-            <p>Upload a photo of an <strong>empty room space</strong>, and our AI will analyze its vibes and colors to suggest expertly matched furniture. <br/><em>Note: Photos of people, logos, or QR codes will be rejected.</em></p>
+            <p>Upload a photo of an <strong>empty room space</strong>, and our AI will analyze its vibes and colors to
+                suggest expertly matched furniture. <br /><em>Note: Photos of people, logos, or QR codes will be
+                    rejected.</em></p>
         </header>
 
         <!-- Main Input Card -->
@@ -31,7 +35,7 @@
                     <input type="file" id="file-input" accept="image/*" hidden />
                     <div class="upload-content" id="upload-content">
                         <div class="icon-pulse">
-                           <i class="fa-solid fa-cloud-arrow-up icon-large"></i>
+                            <i class="fa-solid fa-cloud-arrow-up icon-large"></i>
                         </div>
                         <h3>Drag & drop an EMPTY room photo here</h3>
                         <p>or click to browse. (No logos, QR codes, or people)</p>
@@ -69,7 +73,8 @@
 
                 <div class="input-group full-width">
                     <label for="custom-instructions">Custom Details <span class="optional">(Optional)</span></label>
-                    <textarea id="custom-instructions" placeholder="e.g., I have a $500 budget, need space-saving ideas, make it cat-friendly..."></textarea>
+                    <textarea id="custom-instructions"
+                        placeholder="e.g., I have a Rs500000 budget, need space-saving ideas, make it cat-friendly..."></textarea>
                 </div>
             </div>
 
@@ -109,8 +114,8 @@
                     <i class="fa-regular fa-lightbulb"></i>
                 </div>
                 <div>
-                   <h4>Style Overview</h4>
-                   <p id="style-text">Loading style description...</p>
+                    <h4>Style Overview</h4>
+                    <p id="style-text">Loading style description...</p>
                 </div>
             </div>
 
@@ -119,14 +124,14 @@
             </div>
 
 
-            
+
             <div class="action-footer">
-               <button id="reset-btn" class="secondary-btn">
-                   <i class="fa-solid fa-rotate-left"></i> Start Over
-               </button>
+                <button id="reset-btn" class="secondary-btn">
+                    <i class="fa-solid fa-rotate-left"></i> Start Over
+                </button>
             </div>
         </section>
-        
+
         <footer class="app-footer">
             <p>Future Scope: Image generation APIs and AR previews coming soon.</p>
         </footer>
@@ -160,7 +165,8 @@
             <div id="chatbot-messages" class="chatbot-messages">
                 <div class="chat-message bot-message">
                     <div class="message-bubble">
-                        👋 Hi! I'm your design assistant. Ask me anything about the furniture suggestions — alternatives, pricing tips, layout ideas, or color questions!
+                        👋 Hi! I'm your design assistant. Ask me anything about the furniture suggestions —
+                        alternatives, pricing tips, layout ideas, or color questions!
                     </div>
                 </div>
             </div>
@@ -175,4 +181,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

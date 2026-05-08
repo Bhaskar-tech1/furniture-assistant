@@ -174,6 +174,11 @@ function displayResults(data) {
                 <div class="reason-badge">
                    <strong>Match:</strong> ${item.reason}
                 </div>
+                <div class="card-footer" style="margin-top: 15px; text-align: right;">
+                    <a href="${item.product_link}" target="_blank" class="view-product-link" style="color: var(--primary-color); text-decoration: none; font-weight: 600; font-size: 0.9rem;">
+                        View Product <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.8rem; margin-left: 5px;"></i>
+                    </a>
+                </div>
             `;
             furnitureContainer.appendChild(card);
         });

@@ -95,28 +95,32 @@ def generate_suggestions():
                     "description": "A low-profile sofa with clean lines.",
                     "image_url": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
                     "reason": "Matches modern aesthetic and color palette.",
-                    "suggested_color_hex": "#ff5733"
+                    "suggested_color_hex": "#ff5733",
+                    "product_link": "https://www.google.com/search?q=sleek+modern+sofa"
                 },
                 {
                     "name": "Glass Coffee Table",
                     "description": "Transparent glass top with a metal frame.",
                     "image_url": "https://images.unsplash.com/photo-1582582494708-1bf916e710c2",
                     "reason": "Adds a light, airy feel.",
-                    "suggested_color_hex": "#cccccc"
+                    "suggested_color_hex": "#cccccc",
+                    "product_link": "https://www.google.com/search?q=glass+coffee+table"
                 },
                 {
                     "name": "Accent Chair",
                     "description": "A vibrant accent chair for a pop of color.",
                     "image_url": "https://images.unsplash.com/photo-1582582425600-6f7d1e03bfe5",
                     "reason": "Provides contrast against the dominant hue.",
-                    "suggested_color_hex": "#0044ff"
+                    "suggested_color_hex": "#0044ff",
+                    "product_link": "https://www.google.com/search?q=modern+accent+chair"
                 },
                 {
                     "name": "Floor Lamp",
                     "description": "Modern floor lamp with adjustable brightness.",
                     "image_url": "https://images.unsplash.com/photo-1519710164239-da123dc03ef4",
                     "reason": "Enhances lighting and complements style.",
-                    "suggested_color_hex": "#ffffff"
+                    "suggested_color_hex": "#ffffff",
+                    "product_link": "https://www.google.com/search?q=modern+floor+lamp"
                 }
             ]
         }
@@ -146,10 +150,10 @@ def generate_suggestions():
         f"The room is intended to be a {room_type}. The preferred overall design style is {preferred_style}. "
         f"The user has the following custom details/constraints: {custom_instructions}. "
         "Generate EXACTLY 4 specific furniture item suggestions that fit the room perfectly. "
-        "For each item, provide a 'name', a detailed 'description', a 'reason' why it matches the room, and a 'suggested_color_hex'. "
+        "For each item, provide a 'name', a detailed 'description', a 'reason' why it matches the room, a 'suggested_color_hex', and a 'product_link' (a Google Search URL for the item). "
         "Also provide an overarching 'style_description'. "
         "Return your response strictly as valid JSON with NO markdown blocks and containing precisely this structure:\n"
-        "{\"style_description\": \"...\", \"items\": [{\"name\": \"...\", \"description\": \"...\", \"reason\": \"...\", \"suggested_color_hex\": \"#HEXCODE\"}]}"
+        "{\"style_description\": \"...\", \"items\": [{\"name\": \"...\", \"description\": \"...\", \"reason\": \"...\", \"suggested_color_hex\": \"#HEXCODE\", \"product_link\": \"...\"}]}"
     )
 
     try:
